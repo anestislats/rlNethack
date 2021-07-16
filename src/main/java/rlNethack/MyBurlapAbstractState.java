@@ -1,6 +1,10 @@
 package rlNethack;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,6 +14,7 @@ import org.projectxy.iv4xrLib.NethackWrapper;
 
 import A.B.PlayerStatus;
 import burlap.mdp.core.state.State;
+import eu.iv4xr.framework.mainConcepts.WorldEntity;
 import eu.iv4xr.framework.mainConcepts.WorldModel;
 
 
@@ -17,53 +22,41 @@ import eu.iv4xr.framework.mainConcepts.WorldModel;
 public class MyBurlapAbstractState implements State {
 	
 	
-	 WorldModel wom ;
-	 NethackWrapper nhw;
-	 PlayerStatus ps;
+	 public WorldModel wom ;
+	 //NethackWrapper nhw;
+	 //PlayerStatus ps;
 	 
-	 // Maybe need to add our exact features (?) 
-	 int f1; // Come up with better names
-	 int f2;
-	 int f3;
-	   
-	 
-	   public MyBurlapAbstractState(WorldModel wom) {
+	 public MyBurlapAbstractState(WorldModel wom) {
 	       this.wom = wom ;
-	       this.ps = ps; 		//maybe we need to create a ps parameter for MyBurlapAbstractState
-	       
-	       f1 = (int) wom.position.x ; //come up with better names
-	       f2 = (int) wom.position.y ;
-	       f2 = (int) ps.health ;
-	   }
+	 }
 	
 	
-	
-	
-
+	/**
+	 * The names of the features: 
+	 */
 	public List<Object> variableKeys() {
-		
-		
-	    int[] varKey = {f1, f2, f3};
-	    
-	    	    
+	    String[] varKeys = {"x", "y", "health"}  ;	    	    
 	    List<Object> keys = new ArrayList<Object>();
-	    
-	    keys.add(varKey);
-	    	    
+	    for(int k=0; k<varKeys.length; k++) keys.add(varKeys[k]) ;
 	    return keys ;
-	    
 	}
 	    
 	    
-	
-
-	public Object get(Object keys) { 				//??
-		
-		 
-
+	/**
+	 * Getting the features value:
+	 */
+	public Object get(Object key) {
+	    switch((String) key) {
+	       case "x" : return wom.position.x ;
+	       case "y" : return wom.position.y ;
+	       case "health" : return getPlayer().getProperty("health") ;
+	    }
+	    throw new IllegalArgumentException() ;
      }
 
-	
+	/* maybe we don't have to implement this; i think Burlap will only keep track
+	  the features set above.
+	  
 	@Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -78,24 +71,32 @@ public class MyBurlapAbstractState implements State {
         return true;
 
     }
+	*/
 	
-	
-	
-
 	
 	public State copy() { // Not sure about this one
-		
-		
 		try {
-			return (State) wom.deepclone();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    // deep cloning the wom:
+		    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	        ObjectOutputStream out = new ObjectOutputStream(bos);
+	        out.writeObject(wom);
+	        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+	        ObjectInputStream in = new ObjectInputStream(bis);
+	        WorldModel copied = (WorldModel) in.readObject();
+	        return new MyBurlapAbstractState(copied) ;
 		}
-		return null;
+		catch(Exception e) {
+		    return null ;
+		}
 	}
+	
+	public WorldEntity getPlayer() {
+	    return wom.getElement(wom.agentId) ; 
+	}
+	
+	public boolean isAlive() {
+        WorldEntity playerStatus = wom.getElement(wom.agentId) ;
+        return playerStatus.getBooleanProperty("isAlive") ;        
+    }
 
 }
