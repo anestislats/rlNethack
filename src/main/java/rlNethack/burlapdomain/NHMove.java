@@ -7,6 +7,7 @@ import burlap.mdp.core.action.Action;
 /**
  * Representing Nethack-actions "move", to 4 possible directions.
  */
+
 public class NHMove implements Action {
     
     public Movement direction ;

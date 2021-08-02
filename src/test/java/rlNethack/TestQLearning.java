@@ -31,7 +31,7 @@ public class TestQLearning {
                0.1) ;
        
        List<Episode> episodes = new ArrayList<Episode>(10) ;
-       // learning 10 episides...
+       // learning 10 episodes...
        for (int k=0; k<100; k++) {
            episodes.add(qAgent.runLearningEpisode(env)) ;
            env.resetEnvironment(); 

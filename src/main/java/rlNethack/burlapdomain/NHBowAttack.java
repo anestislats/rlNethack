@@ -26,3 +26,4 @@ public class NHBowAttack implements Action {
     }
 
 }
+ 

@@ -4,11 +4,17 @@ import org.projectxy.iv4xrLib.MyEnv;
 import org.projectxy.iv4xrLib.NethackWrapper;
 import org.projectxy.iv4xrLib.NethackWrapper.Movement;
 
+import A.B.PlayerStatus;
+import A.B.Screen;
+import A.B.Tile;
 import burlap.mdp.core.action.Action;
 import burlap.mdp.core.state.State;
 import burlap.mdp.singleagent.environment.Environment;
 import burlap.mdp.singleagent.environment.EnvironmentOutcome;
+import eu.iv4xr.framework.mainConcepts.WorldEntity;
 import eu.iv4xr.framework.mainConcepts.WorldModel;
+import rlNethack.burlapdomain.NHAimWithBow;
+import rlNethack.burlapdomain.NHDoNothing;
 import rlNethack.burlapdomain.NHMove;
 import rlNethack.burlapdomain.NHPickup;
 
@@ -18,19 +24,36 @@ public class BurlapEnv4Nethack implements Environment{
 
 	// NethackWrapper nhw;
     MyEnv nhenv ;
-	
+    PlayerStatus ps; 
+    Screen nethack;
+    
+    
+    
+    
+    
+    
+	public String equippedWeap;
+	public Tile[][] tiles;
 	double lastReward;
 	
 
     BurlapEnv4Nethack(MyEnv nhenv) { 
     	this.nhenv = nhenv;
+    	this.nethack = nhenv.nethackUnderTest.nethack;
+    	
     }
     
     
-
-      public State currentObservation() {  // State --> Burlap state
+      public State currentObservation() {  				// State --> Burlap state
          WorldModel wom = nhenv.observe();
-         return (new MyBurlapAbstractState(wom)) ;
+         //equippedWeap = ps.weap.toString(); 			// the equipped weapon of the player
+         tiles= nethack.tiles; 							// the tiles of the map
+         
+         //System.out.println(">>>"+ wom.getElement(wom.agentId));
+         
+         equippedWeap = wom.getElement(wom.agentId).getProperty("equippedWeaponName").toString();
+         
+         return (new MyBurlapAbstractState(wom, equippedWeap, tiles   )) ;
          
       }
       
@@ -39,22 +62,60 @@ public class BurlapEnv4Nethack implements Environment{
 
       //@Override
       public EnvironmentOutcome executeAction(Action a) {
-           WorldModel wom = Observe();
-           State s0 = new MyBurlapAbstractState(wom);
+    	  
+    	  MyBurlapAbstractState s = (MyBurlapAbstractState) currentObservation();
+//           WorldModel wom = Observe();
+//           equippedWeap = wom.getElement("equippedWeaponName").toString();							// the equipped weapon of the player
+//           tiles= nethack.tiles; 																	// the tiles of the map
+           
+    	   State s0 = s.copy();
+    	   
+           //State s0 = new MyBurlapAbstractState(wom, equippedWeap, tiles).copy();
+           
+           
            
            if(a instanceof NHMove) {
                NHMove a_ = (NHMove) a ;
                nhenv.move(a_.direction) ;
+               
+           }
+           else if (a instanceof NHDoNothing) { 													// maybe we should include the DoNothing move into Moves
+        	   
+        	   nhenv.move(Movement.DONOTHING);
+        	   
            }
            else if (a instanceof NHPickup) {
-               // ok so now you need to instruct NH to pickup whatever the item in the current sq
+        	   NHPickup a_ = (NHPickup) a;
+        	   //playerID = MyBurlapAbstractState.
+        	   
+        	   nhenv.interact("Player", null, NethackWrapper.Interact.PickupItem);						// the 2 null values are for AgentId and TargetId. 
+        	  
            }
+           else if (a instanceof NHAimWithBow) {
+        	   
+        	   nhenv.interact("Player", null, NethackWrapper.Interact.AimWithBow);
+        	   
+           }
+           
+           
+           
+           
+           
            // implement other actions
            
-           wom = Observe();
+           s = (MyBurlapAbstractState) currentObservation();
            
-           State s1 = new MyBurlapAbstractState(wom);
+           State s1 = s.copy();
            
+           
+           
+//           wom = Observe();
+//           
+//           equippedWeap = wom.getElement("equippedWeaponName").toString(); 		// the equipped weapon of the player
+//           tiles= nethack.tiles; 												// the tiles of the map
+//           
+//           State s1 = new MyBurlapAbstractState(wom, equippedWeap, tiles).copy();
+//           
            double reward = 10; // need to change
            
            EnvironmentOutcome eo = new EnvironmentOutcome(s0, a,s1,reward, isInTerminalState() ) ;
