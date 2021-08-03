@@ -17,11 +17,13 @@ import rlNethack.burlapdomain.NHDomain;
 public class TestQLearning {
     
    @Test
-   public void test1() {
+   public void test1() throws InterruptedException {
        
-       NethackWrapper driver = new NethackWrapper();
-       driver.launchNethack(new NethackConfiguration());
-       MyEnv env_ = new MyEnv(driver);
+	   NethackWrapper driver = new NethackWrapper();
+	   driver.launchNethack(new NethackConfiguration());
+	   MyEnv env_ = new MyEnv(driver);
+	   env_.startNewGame();
+	   
        BurlapEnv4Nethack env = new BurlapEnv4Nethack(env_) ;
        
        QLearning qAgent = new QLearning(new NHDomain(),
@@ -31,6 +33,7 @@ public class TestQLearning {
                0.1) ;
        
        List<Episode> episodes = new ArrayList<Episode>(10) ;
+       
        // learning 10 episodes...
        for (int k=0; k<100; k++) {
            episodes.add(qAgent.runLearningEpisode(env)) ;

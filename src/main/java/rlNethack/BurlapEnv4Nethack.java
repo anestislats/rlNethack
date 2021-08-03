@@ -28,10 +28,6 @@ public class BurlapEnv4Nethack implements Environment{
     Screen nethack;
     
     
-    
-    
-    
-    
 	public String equippedWeap;
 	public Tile[][] tiles;
 	double lastReward;
@@ -58,6 +54,14 @@ public class BurlapEnv4Nethack implements Environment{
       }
       
       
+      void delay(int t) {
+          try {
+       	   Thread.sleep(t);
+          }
+          catch(Exception e) {
+       	   
+          }
+      }
       
 
       //@Override
@@ -97,7 +101,9 @@ public class BurlapEnv4Nethack implements Environment{
         	   
            }
            
-           
+
+           // putting a deliberate delay here to give time to NH to update its state
+           delay(30) ;
            
            
            
@@ -106,6 +112,9 @@ public class BurlapEnv4Nethack implements Environment{
            s = (MyBurlapAbstractState) currentObservation();
            
            State s1 = s.copy();
+           
+       	System.out.println(">>> executeAction is invoked: " + a) ;
+
            
            
            

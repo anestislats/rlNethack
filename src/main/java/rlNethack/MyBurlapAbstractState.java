@@ -5,10 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Vector;
+import java.io.Serializable;
+import java.util.*;
+import java.util.Map.Entry;
+//import java.util.Vector;
 
 import org.projectxy.iv4xrLib.NethackWrapper;
 
@@ -85,70 +85,81 @@ public class MyBurlapAbstractState implements State {
 	*/
 	
 	
+	
+	
 	public State copy() { // Not sure about this one
 		try {
-		    // deep cloning the wom:
-		    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	        ObjectOutputStream out = new ObjectOutputStream(bos);
-	        out.writeObject(wom);
-	        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-	        ObjectInputStream in = new ObjectInputStream(bis);
-	       
-	        
-	        WorldModel womCopied = (WorldModel) in.readObject();
-	        String equippedWeapCopied = cloneEquippedWeapon(equippedWeap);
-	        Tile[][] tilesCopied = cloneMap(tiles);
-	        
-	        //Tile[][] tilesCopied = tiles.clone();
-	        
+			WorldModel womCopied = (WorldModel) cloneIt(wom) ;
+		    String equippedWeapCopied = "" + equippedWeap ;
+	        Tile[][] tilesCopied = (Tile[][]) cloneIt(tiles); 
 	        return new MyBurlapAbstractState(womCopied, equippedWeapCopied, tilesCopied) ;							// Add equippedWeap and tiles
 		}
 		catch(Exception e) {
+			e.printStackTrace();;
 		    return null ;
 		}
 	}
 	
 	
-	
-	
-	
-	public Tile[][] cloneMap(Tile[][] map) {
-		try {
-			//clone the tile map
-		    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		    ObjectOutputStream out = new ObjectOutputStream(bos);
-		    out.writeObject(map);
-		    ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-		    ObjectInputStream in = new ObjectInputStream(bis);
-		    Tile[][] mapCopied = (Tile[][]) in.readObject();
-	
-		    return mapCopied;
+	static public Object cloneIt(WorldModel wom) throws ClassNotFoundException, IOException {
+		WorldModel wom2 = new WorldModel() ;
+		wom2.agentId = "" + wom.agentId ;
+		wom2.timestamp = 0 + wom.timestamp ;
+		if (wom.position!=null) wom2.position = wom.position.copy() ;
+		if (wom.extent != null) wom2.extent = wom.extent.copy() ;
+		if (wom.velocity != null) wom2.velocity = wom.velocity.copy() ;
+		for(var e : wom.elements.entrySet()) {
+			wom2.elements.put(e.getKey(),(WorldEntity) cloneIt(e.getValue())) ;
 		}
-		catch(Exception e) {
-		    return null ;
-		}
-
+		return wom2 ;
 	}
 	
-	
-	public String cloneEquippedWeapon(String equippedWeap) {
-		try {
-			//clone the equipped Weapon
-		    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		    ObjectOutputStream out = new ObjectOutputStream(bos);
-		    out.writeObject(equippedWeap);
-		    ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-		    ObjectInputStream in = new ObjectInputStream(bis);
-		    String equippedWeapCopied = (String) in.readObject();
-	
-		    return equippedWeapCopied;
-		}
-		catch(Exception e) {
-		    return null ;
-		}
-
+	static public Object cloneIt(WorldEntity e) throws IOException, ClassNotFoundException {
 		
+		WorldEntity e2 = new WorldEntity(e.id,e.type,e.dynamic) ;
+		if(e.position != null) e2.position = e.position.copy() ;
+		if(e.extent != null) e2.extent = e.extent.copy() ;
+		
+		Object[] props = new Object[2*e.properties.size()] ;
+		int i=0 ;
+		for(var p : e.properties.entrySet()) {
+			props[i] = p.getKey() ;
+			props[i+1] = p.getValue() ;
+			i += 2 ;
+		}
+		
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream out = new ObjectOutputStream(bos);
+		out.writeObject(props);
+		ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+		ObjectInputStream in = new ObjectInputStream(bis);		
+		Object[] props_ = (Object[]) in.readObject();
+
+		i = 0 ;
+		while (i < props_.length) {
+			e2.properties.put((String) props_[i], (Serializable) props_[i+1]) ;
+			i += 2 ;
+		}
+		
+		for (var f : e.elements.entrySet()) {
+			e2.elements.put(f.getKey(), (WorldEntity) cloneIt(f.getValue())) ;
+		}
+		return e2 ;		
 	}
+	
+	
+	public Object cloneIt(Tile[][] map) throws IOException, ClassNotFoundException {
+		// clone the tile map
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream out = new ObjectOutputStream(bos);
+		out.writeObject(map);
+		ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+		ObjectInputStream in = new ObjectInputStream(bis);
+		Tile[][] mapCopied = (Tile[][]) in.readObject();
+		return mapCopied;
+	}
+	
+
 	
 	
 	

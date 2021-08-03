@@ -44,7 +44,8 @@ public class NHActionType implements ActionType {
      * Incomplete implementation, see the code ..
      */
     public List<Action> allApplicableActions(State s) {
-        
+    	
+    	
         MyBurlapAbstractState s_ = (MyBurlapAbstractState) s ;
         
         List<Action> possibleActions = new LinkedList<>() ;
@@ -157,10 +158,10 @@ public class NHActionType implements ActionType {
         	
         }
         
-        
-        
-        
-      
+        System.out.println(">>> allApplicableActions is invoked") ;
+        for(var e : possibleActions) {
+        	System.out.println("    " + e) ;
+        }
         return possibleActions ;
     }
     
