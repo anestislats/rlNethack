@@ -2,11 +2,15 @@ package rlNethack;
 
 import org.projectxy.iv4xrLib.MyEnv;
 import org.projectxy.iv4xrLib.NethackWrapper;
+import org.projectxy.iv4xrLib.NethackWrapper.Interact;
 import org.projectxy.iv4xrLib.NethackWrapper.Movement;
 
+import A.B.Food;
+import A.B.HealthPotion;
 import A.B.PlayerStatus;
 import A.B.Screen;
 import A.B.Tile;
+import A.B.Water;
 import burlap.mdp.core.action.Action;
 import burlap.mdp.core.state.State;
 import burlap.mdp.singleagent.environment.Environment;
@@ -14,9 +18,13 @@ import burlap.mdp.singleagent.environment.EnvironmentOutcome;
 import eu.iv4xr.framework.mainConcepts.WorldEntity;
 import eu.iv4xr.framework.mainConcepts.WorldModel;
 import rlNethack.burlapdomain.NHAimWithBow;
+import rlNethack.burlapdomain.NHBowAttack;
 import rlNethack.burlapdomain.NHDoNothing;
+import rlNethack.burlapdomain.NHEquipBow;
+import rlNethack.burlapdomain.NHEquipMeleeWeapon;
 import rlNethack.burlapdomain.NHMove;
 import rlNethack.burlapdomain.NHPickup;
+import rlNethack.burlapdomain.NHUseHeal;
 
 
 
@@ -67,10 +75,11 @@ public class BurlapEnv4Nethack implements Environment{
       //@Override
       public EnvironmentOutcome executeAction(Action a) {
     	  
-    	  MyBurlapAbstractState s = (MyBurlapAbstractState) currentObservation();
+    	   MyBurlapAbstractState s = (MyBurlapAbstractState) currentObservation();
 //           WorldModel wom = Observe();
 //           equippedWeap = wom.getElement("equippedWeaponName").toString();							// the equipped weapon of the player
 //           tiles= nethack.tiles; 																	// the tiles of the map
+    	   String agentId = s.wom.agentId;
            
     	   State s0 = s.copy();
     	   
@@ -92,14 +101,100 @@ public class BurlapEnv4Nethack implements Environment{
         	   NHPickup a_ = (NHPickup) a;
         	   //playerID = MyBurlapAbstractState.
         	   
-        	   nhenv.interact("Player", null, NethackWrapper.Interact.PickupItem);						// the 2 null values are for AgentId and TargetId. 
+        	   nhenv.interact(agentId, null, NethackWrapper.Interact.PickupItem);						// the 2 null values are for AgentId and TargetId. 
         	  
            }
            else if (a instanceof NHAimWithBow) {
         	   
-        	   nhenv.interact("Player", null, NethackWrapper.Interact.AimWithBow);
+        	   nhenv.interact(agentId, null, NethackWrapper.Interact.AimWithBow);
         	   
            }
+           else if (a instanceof NHUseHeal) {					// Use any heal item HealthPotion/Food/Water
+        	   
+        	   WorldEntity inv = s.wom.getElement("Inventory") ;
+        	   String itemId = "";
+        	   
+        	   for(WorldEntity invItem : inv.elements.values()) {
+        		   
+        		   if( (invItem.type.equals("Food") || invItem.type.equals("Water") || invItem.type.equals("HealthPotion")) ) {
+		          		
+        			   
+        			   itemId = invItem.id;
+		          	          		
+                       System.out.println(">>> Item ID: " + itemId );
+                       System.out.println(">>> Item Name: " + invItem.type );
+		          		
+                       break;
+		           }
+        	   }
+        	   
+        	   if (itemId != "") {
+        		   nhenv.interact(agentId, itemId, NethackWrapper.Interact.SelectItemFromInv);
+        	   }
+        	   
+           }
+           else if (a instanceof NHEquipBow) {					// Equip Bow from Inventory
+        	   
+        	   WorldEntity inv = s.wom.getElement("Inventory") ;
+        	   String itemId = "";
+        	   
+        	   for(WorldEntity invItem : inv.elements.values()) {
+        		   
+        		   if (invItem.type.equals("Bow") )  { 		// not sure whether we should use contains() or equals()
+		          		
+        			   itemId = invItem.id;
+		          	          		
+                       System.out.println(">>> Item ID: " + itemId );
+                       System.out.println(">>> Item Name: " + invItem.type );
+		          		
+                       break;
+		           }
+        	   }
+        	   
+        	   if (itemId != "") {
+        		   nhenv.interact(agentId, itemId, NethackWrapper.Interact.SelectItemFromInv);
+        	   }
+        	   
+           }
+           else if (a instanceof NHEquipMeleeWeapon) {					// Equip Sword from Inventory
+        	   
+        	   WorldEntity inv = s.wom.getElement("Inventory") ;
+        	   String itemId = "";
+        	   
+        	   for(WorldEntity invItem : inv.elements.values()) {
+        		   
+        		   if (invItem.type.equals("Sword") )  { 				// not sure whether we should use contains() or equals(), probably both work
+		          		
+        			   itemId = invItem.id;
+		          	          		
+                       System.out.println(">>> Item ID: " + itemId );
+                       System.out.println(">>> Item Name: " + invItem.type );
+		          		
+                       break;
+		           }
+        	   }
+        	   
+        	   if (itemId != "") {
+        		   nhenv.interact(agentId, itemId, NethackWrapper.Interact.SelectItemFromInv);
+        	   }
+        	   
+           }
+           else if (a instanceof NHBowAttack) {
+        	   
+        	   NHBowAttack a_ = (NHBowAttack) a ;
+
+
+        	   nhenv.interact(agentId, null, Interact.AimWithBow);
+       		   nhenv.move(a_.direction) ;	
+        	   
+        	   
+        	   
+        	   
+           }
+           
+           
+           
+           
            
 
            // putting a deliberate delay here to give time to NH to update its state
@@ -113,7 +208,7 @@ public class BurlapEnv4Nethack implements Environment{
            
            State s1 = s.copy();
            
-       	System.out.println(">>> executeAction is invoked: " + a) ;
+       	   System.out.println(">>> executeAction is invoked: " + a) ;
 
            
            
@@ -127,7 +222,7 @@ public class BurlapEnv4Nethack implements Environment{
 //           
            double reward = 10; // need to change
            
-           EnvironmentOutcome eo = new EnvironmentOutcome(s0, a,s1,reward, isInTerminalState() ) ;
+           EnvironmentOutcome eo = new EnvironmentOutcome(s0, a, s1, reward, isInTerminalState() ) ;
            
            lastReward = reward;
            return eo ;
@@ -137,7 +232,13 @@ public class BurlapEnv4Nethack implements Environment{
       
       
       
-      public boolean isInTerminalState() {
+      private Movement getDirection() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	public boolean isInTerminalState() {
          return false ;
       }
       

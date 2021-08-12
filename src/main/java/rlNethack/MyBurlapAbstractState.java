@@ -44,7 +44,7 @@ public class MyBurlapAbstractState implements State {
 	 * The names of the features: 
 	 */
 	public List<Object> variableKeys() {
-	    String[] varKeys = {"x", "y", "health", "equippedWeapon", "tileMap"}  ;	    	    
+	    String[] varKeys = {"x", "y", "health", "equippedWeapon", "tileMap", "currentLevel", "stairPositionX", "stairPositionY", "xDistanceFromStair", "yDistanceFromStair"}  ;	    	    
 	    List<Object> keys = new ArrayList<Object>();
 	    for(int k=0; k<varKeys.length; k++) keys.add(varKeys[k]) ;
 	    return keys ;
@@ -61,6 +61,40 @@ public class MyBurlapAbstractState implements State {
 	       case "health" : return getPlayer().getProperty("health") ;
 	       case "equippedWeapon" : return equippedWeap;
 	       case "tileMap" : return tiles;
+	       case "currentLevel" : return getPlayer().getIntProperty("currentLevel");
+	       
+	       case "stairPositionX" :{
+	    	   WorldEntity stairs = wom.getElement("Stairs") ;
+	    	   return stairs.position.x;
+	       }
+	       
+	       case "stairPositionY" :{
+	    	   WorldEntity stairs = wom.getElement("Stairs") ;
+	    	   return stairs.position.y;
+	       }
+	       
+	       case "xDistanceFromStair":{
+	    	   
+	    	   WorldEntity stairs = wom.getElement("Stairs") ;
+	    	   int stairX = (int) stairs.position.x;
+	    	   int agentX = (int) wom.position.x;
+	    	   
+	    	   int dx = Math.abs(agentX - stairX);
+	    	   
+	    	   return dx;
+	       }
+	       case "yDistanceFromStair":{
+	    	   
+	    	   WorldEntity stairs = wom.getElement("Stairs") ;
+	    	   int stairY = (int) stairs.position.y;
+	    	   int agentY = (int) wom.position.y;
+	    	   
+	    	   int dy = Math.abs(agentY - stairY);
+	    	   
+	    	   return dy;
+	       }
+	       
+	       
 	    }
 	    throw new IllegalArgumentException() ;
      }

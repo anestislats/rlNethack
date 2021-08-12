@@ -4,10 +4,12 @@ import java.io.Serializable;
 import java.util.*;
 
 import org.projectxy.iv4xrLib.NethackWrapper;
+import org.projectxy.iv4xrLib.Utils;
 import org.projectxy.iv4xrLib.NethackWrapper.Interact;
 import org.projectxy.iv4xrLib.NethackWrapper.Movement;
 
 import A.B.Bow;
+import A.B.Monster;
 import A.B.PlayerStatus;
 import A.B.Screen;
 import A.B.Tile;
@@ -150,19 +152,27 @@ public class NHActionType implements ActionType {
         
         if ( equippedWeap.contains("Bow") ) {							//find out a way to choose the direction
         	
-        	possibleActions.add(new NHBowAttack(Movement.UP));
-        	possibleActions.add(new NHBowAttack(Movement.DOWN));
-        	possibleActions.add(new NHBowAttack(Movement.LEFT));
-        	possibleActions.add(new NHBowAttack(Movement.RIGHT));
+        	
+        	if (upBowAttackAvailable(s_))     {possibleActions.add(new NHBowAttack(Movement.UP));}
+        	
+        	if (downBowAttackAvailable(s_))   {possibleActions.add(new NHBowAttack(Movement.DOWN));}
+        	
+        	if (leftBowAttackAvailable(s_))   {possibleActions.add(new NHBowAttack(Movement.LEFT));}
+        	
+        	if (rightBowAttackAvailable(s_))  {possibleActions.add(new NHBowAttack(Movement.RIGHT));}
         	
         	
         }
+        
+        
         
         System.out.println(">>> allApplicableActions is invoked") ;
         for(var e : possibleActions) {
         	System.out.println("    " + e) ;
         }
+        
         return possibleActions ;
+        
     }
     
     
@@ -254,5 +264,188 @@ public class NHActionType implements ActionType {
 		
 		
 	}
+	
+	
+	
+	
+	
+	public boolean upBowAttackAvailable (MyBurlapAbstractState s_){
+		
+		for(WorldEntity e : s_.wom.elements.values()) {
+            if(e.type.equals(Monster.class.getSimpleName())) {
+                // e is a monster
+           	 
+           	    int mx = (int) e.position.x; 					// monster's x coordinate
+                int my = (int) e.position.y;					// monster's y coordinate
+                int ax = (int) s_.wom.position.x;				// agent's x coordinate
+                int ay = (int) s_.wom.position.y;				// agent's y coordinate
+           	    
+                
+                 if (mx == ax) {
+
+               	 
+	               	 if (my<ay) {
+	               		 
+	               		 
+	               		for (int i = my; i<ay; i++) {
+	               			 
+	        				 if(s_.tiles[ax][i] instanceof Wall) {
+	                            
+	                             return false;
+	                             					 
+	        				 }
+	        				 //else return true;
+	        				
+                		 }
+	               		 return true;
+	               		 
+	               	 }
+	               	 //else return false;
+	               	 
+                }
+            }
+            
+		}
+		return false;
+	}
+	
+	
+	
+	
+	public boolean downBowAttackAvailable (MyBurlapAbstractState s_){
+		
+		for(WorldEntity e : s_.wom.elements.values()) {
+            if(e.type.equals(Monster.class.getSimpleName())) {
+                // e is a monster
+           	 
+           	    int mx = (int) e.position.x; 					// monster's x coordinate
+                int my = (int) e.position.y;					// monster's y coordinate
+                int ax = (int) s_.wom.position.x;				// agent's x coordinate
+                int ay = (int) s_.wom.position.y;				// agent's y coordinate
+           	    
+                
+                 if (mx == ax) {
+
+               	 
+	               	 if (my>ay) {
+	               		 
+	               		 
+	               		for (int i = ay; i<my; i++) {
+	               			 
+	        				 if(s_.tiles[ax][i] instanceof Wall) {
+	                            
+	                             return false;
+	                             					 
+	        				 }
+	        				 //else return true;
+	        				
+                		 }
+	               		 return true;
+	               		 
+	               	 }
+	               	 //else return false;
+	               	 
+                }
+            }
+            
+		}
+		return false;
+	}
+	
+	
+	
+	
+	public boolean leftBowAttackAvailable (MyBurlapAbstractState s_){
+		
+		for(WorldEntity e : s_.wom.elements.values()) {
+            if(e.type.equals(Monster.class.getSimpleName())) {
+                // e is a monster
+           	 
+           	    int mx = (int) e.position.x; 					// monster's x coordinate
+                int my = (int) e.position.y;					// monster's y coordinate
+                int ax = (int) s_.wom.position.x;				// agent's x coordinate
+                int ay = (int) s_.wom.position.y;				// agent's y coordinate
+           	    
+                
+                 if (my == ay) {
+
+               	 
+	               	 if (mx<ax) {
+	               		 
+	               		 
+	               		for (int i = mx; i<ax; i++) {
+	               			 
+	        				 if(s_.tiles[i][ay] instanceof Wall) {
+	                            
+	                             return false;
+	                             					 
+	        				 }
+	        				 //else return true;
+	        				
+                		 }
+	               		 return true;
+	               		 
+	               	 }
+	               	 //else return false;
+	               	 
+                }
+            }
+            
+		}
+		return false;
+	}
+	
+	
+	
+	
+	public boolean rightBowAttackAvailable (MyBurlapAbstractState s_){
+		
+		for(WorldEntity e : s_.wom.elements.values()) {
+            if(e.type.equals(Monster.class.getSimpleName())) {
+                // e is a monster
+           	 
+           	    int mx = (int) e.position.x; 					// monster's x coordinate
+                int my = (int) e.position.y;					// monster's y coordinate
+                int ax = (int) s_.wom.position.x;				// agent's x coordinate
+                int ay = (int) s_.wom.position.y;				// agent's y coordinate
+           	    
+                
+                 if (my == ay) {
+
+               	 
+	               	 if (mx>ax) {
+	               		 
+	               		 
+	               		for (int i = ax; i<mx; i++) {
+	               			 
+	        				 if(s_.tiles[i][ay] instanceof Wall) {
+	                            
+	                             return false;
+	                             					 
+	        				 }
+	        				 //else return true;
+	        				
+                		 }
+	               		 return true;
+	               		 
+	               	 }
+	               	 //else return false;
+	               	 
+                }
+            }
+            
+		}
+		return false;
+	}
+	               		 
+	               		 
+	               	 
+                 
+                 
+                 
+	               	
+		
+		
+	
 
 }
