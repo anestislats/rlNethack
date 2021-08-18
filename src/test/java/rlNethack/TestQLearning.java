@@ -26,7 +26,11 @@ public class TestQLearning {
 	   
        BurlapEnv4Nethack env = new BurlapEnv4Nethack(env_) ;
        
-       QLearning qAgent = new QLearning(new NHDomain(),
+       NHDomain domain = new NHDomain();
+       
+       
+       
+       QLearning qAgent = new QLearning(domain,
                0.99, 
                new SimpleHashableStateFactory(),
                0.1,
@@ -36,7 +40,7 @@ public class TestQLearning {
        
        // learning 10 episodes...
        for (int k=0; k<100; k++) {
-           episodes.add(qAgent.runLearningEpisode(env)) ;
+           episodes.add(qAgent.runLearningEpisode(env, 100)) ;
            env.resetEnvironment(); 
        }
        

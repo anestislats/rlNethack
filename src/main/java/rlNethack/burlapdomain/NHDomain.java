@@ -4,11 +4,16 @@ import burlap.mdp.core.action.Action;
 import burlap.mdp.core.state.State;
 import burlap.mdp.singleagent.SADomain;
 import burlap.mdp.singleagent.environment.EnvironmentOutcome;
+import burlap.mdp.singleagent.model.RewardFunction;
 import burlap.mdp.singleagent.model.SampleModel;
 
 public class NHDomain extends SADomain {
 	
-	static class NHModel implements  SampleModel {
+//	int goalx = 10;
+//	int goaly = 10;
+	
+	
+	static class NHModel implements SampleModel {
 
 		@Override
 		public EnvironmentOutcome sample(State s, Action a) {
@@ -21,6 +26,15 @@ public class NHDomain extends SADomain {
 		}
 		
 	}
+	
+//	public void setGoalLocation(int goalx, int goaly){
+//		this.goalx = goalx;
+//		this.goaly = goaly;
+//	}
+	
+	
+	//RewardFunction rf = new NHRewardFunction(s, this.goalx, this.goaly);
+	
     
     public NHDomain() {
         super() ;

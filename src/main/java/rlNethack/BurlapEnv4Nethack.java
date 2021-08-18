@@ -15,6 +15,7 @@ import burlap.mdp.core.action.Action;
 import burlap.mdp.core.state.State;
 import burlap.mdp.singleagent.environment.Environment;
 import burlap.mdp.singleagent.environment.EnvironmentOutcome;
+import burlap.mdp.singleagent.model.RewardFunction;
 import eu.iv4xr.framework.mainConcepts.WorldEntity;
 import eu.iv4xr.framework.mainConcepts.WorldModel;
 import rlNethack.burlapdomain.NHAimWithBow;
@@ -24,6 +25,7 @@ import rlNethack.burlapdomain.NHEquipBow;
 import rlNethack.burlapdomain.NHEquipMeleeWeapon;
 import rlNethack.burlapdomain.NHMove;
 import rlNethack.burlapdomain.NHPickup;
+import rlNethack.burlapdomain.NHRewardFunction;
 import rlNethack.burlapdomain.NHUseHeal;
 
 
@@ -46,6 +48,7 @@ public class BurlapEnv4Nethack implements Environment{
     	this.nethack = nhenv.nethackUnderTest.nethack;
     	
     }
+    
     
     
       public State currentObservation() {  				// State --> Burlap state
@@ -80,8 +83,15 @@ public class BurlapEnv4Nethack implements Environment{
 //           equippedWeap = wom.getElement("equippedWeaponName").toString();							// the equipped weapon of the player
 //           tiles= nethack.tiles; 																	// the tiles of the map
     	   String agentId = s.wom.agentId;
+    	   
+    	   WorldEntity stairs = s.wom.getElement("Stairs") ;
+    	   int goalx = (int) stairs.position.x;
+    	   int goaly = (int) stairs.position.y;
+    	   
+    	   
            
     	   State s0 = s.copy();
+    	   
     	   
            //State s0 = new MyBurlapAbstractState(wom, equippedWeap, tiles).copy();
            
@@ -98,7 +108,7 @@ public class BurlapEnv4Nethack implements Environment{
         	   
            }
            else if (a instanceof NHPickup) {
-        	   NHPickup a_ = (NHPickup) a;
+        	   //NHPickup a_ = (NHPickup) a;
         	   //playerID = MyBurlapAbstractState.
         	   
         	   nhenv.interact(agentId, null, NethackWrapper.Interact.PickupItem);						// the 2 null values are for AgentId and TargetId. 
@@ -219,8 +229,12 @@ public class BurlapEnv4Nethack implements Environment{
 //           tiles= nethack.tiles; 												// the tiles of the map
 //           
 //           State s1 = new MyBurlapAbstractState(wom, equippedWeap, tiles).copy();
+       	   
+       	   
+       	   
+       	   RewardFunction rf = new NHRewardFunction(s, goalx, goaly, (int) s.wom.position.x, (int) s.wom.position.y);
 //           
-           double reward = 10; // need to change
+           double reward = rf.reward(s0, a, s1); // need to change
            
            EnvironmentOutcome eo = new EnvironmentOutcome(s0, a, s1, reward, isInTerminalState() ) ;
            
